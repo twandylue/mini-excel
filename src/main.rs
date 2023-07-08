@@ -2,7 +2,6 @@ use std::env::{self, Args};
 use std::process::ExitCode;
 
 fn main() -> ExitCode {
-    println!("Hello, world!");
     match entry() {
         Ok(_) => ExitCode::SUCCESS,
         Err(_) => ExitCode::FAILURE,
@@ -15,7 +14,7 @@ fn entry() -> Result<(), ()> {
     let mut subcommand: Option<String> = None;
     if let Some(arg) = args.next() {
         match arg.as_str() {
-            "help" | "h" => {
+            "--help" | "-h" => {
                 usage(&program);
                 return Ok(());
             }
@@ -31,6 +30,9 @@ fn entry() -> Result<(), ()> {
     match subcommand.as_str() {
         "cal" => {
             let input_content = read_file(&mut args, &program)?;
+            println!("Original Content:\n{input_content}");
+
+            parse_csv(input_content)?;
 
             // TODO: cal
             // cal(input_content)?;
@@ -54,8 +56,20 @@ fn read_file(args: &mut Args, program: &str) -> Result<String, ()> {
     let input_content = std::fs::read_to_string(input_csv_file).map_err(|e| {
         eprintln!("ERROR: Failed to read input csv file: {}", e);
     })?;
-    
+
     Ok(input_content)
+}
+
+fn parse_csv(input_content: String) -> Result<(), ()> {
+    for col in input_content.split('|') {
+        println!("{col}", col = col.trim());
+    }
+
+    Ok(())
+}
+
+fn cal(input_content: String) -> Result<(), ()> {
+    todo!();
 }
 
 fn usage(program: &str) {
