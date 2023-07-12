@@ -1,3 +1,5 @@
+mod tokens;
+
 use std::env::{self, Args};
 use std::process::ExitCode;
 
@@ -32,9 +34,11 @@ fn entry() -> Result<(), ()> {
             let input_content = read_file(&mut args, &program)?;
             println!("Original Content:\n{input_content}");
 
-            parse_csv(input_content)?;
+            parse_csv(&input_content)?;
+            println!("---------");
+            let (row, col) = estimate_table_size(&input_content);
+            println!("row x col: {row} x {col}");
 
-            // TODO: cal
             // cal(input_content)?;
         }
         _ => {
@@ -60,7 +64,25 @@ fn read_file(args: &mut Args, program: &str) -> Result<String, ()> {
     Ok(input_content)
 }
 
-fn parse_csv(input_content: String) -> Result<(), ()> {
+fn estimate_table_size(input_content: &str) -> (usize, usize) {
+    let mut row_count = 0;
+    let mut col_count = 0;
+    for line in input_content.lines() {
+        row_count += 1;
+        let mut col_count_in_line = 0;
+        for col in line.split('|') {
+            col_count_in_line += 1;
+        }
+        if col_count_in_line > col_count {
+            col_count = col_count_in_line;
+        }
+    }
+
+    (row_count, col_count)
+}
+
+fn parse_csv(input_content: &str) -> Result<(), ()> {
+    // TODO:
     for col in input_content.split('|') {
         println!("{col}", col = col.trim());
     }
