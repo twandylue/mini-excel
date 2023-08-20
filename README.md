@@ -26,7 +26,7 @@ The calculation does not need any UI.
 ## Quick Start
 
 ```console
-$ cargo run ./input.csv
+$ cargo run -- cal ./input.csv
 ...
 ```
 

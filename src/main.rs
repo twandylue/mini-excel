@@ -68,6 +68,9 @@ fn estimate_table_size(input_content: &str) -> (usize, usize) {
     let mut row_count = 0;
     let mut col_count = 0;
     for line in input_content.lines() {
+        if line.trim().is_empty() {
+            continue;
+        }
         row_count += 1;
         let mut col_count_in_line = 0;
         for col in line.split('|') {
