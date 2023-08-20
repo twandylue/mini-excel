@@ -1,5 +1,6 @@
-mod tokens;
+mod data;
 
+use data::{Cell, Table};
 use std::env::{self, Args};
 use std::process::ExitCode;
 
@@ -34,10 +35,29 @@ fn entry() -> Result<(), ()> {
             let input_content = read_file(&mut args, &program)?;
             println!("Original Content:\n{input_content}");
 
-            parse_csv(&input_content)?;
-            println!("---------");
             let (row, col) = estimate_table_size(&input_content);
             println!("row x col: {row} x {col}");
+            println!("---------");
+            let table: Table = parse_table_from_content(&input_content)?;
+
+            println!("Parsed Table Content:");
+            for row in table.cells {
+                for col in row {
+                    match col.get_val() {
+                        data::CellKind::Text(text) => {
+                            print!("{} ", text);
+                        }
+                        data::CellKind::Num(num) => {
+                            print!("{} ", num);
+                        }
+                        data::CellKind::Expr(expr) => {
+                            print!("{} ", expr);
+                        }
+                    }
+                    print!("|");
+                }
+                println!();
+            }
 
             // cal(input_content)?;
         }
@@ -73,7 +93,7 @@ fn estimate_table_size(input_content: &str) -> (usize, usize) {
         }
         row_count += 1;
         let mut col_count_in_line = 0;
-        for col in line.split('|') {
+        for _col in line.split('|') {
             col_count_in_line += 1;
         }
         if col_count_in_line > col_count {
@@ -84,13 +104,27 @@ fn estimate_table_size(input_content: &str) -> (usize, usize) {
     (row_count, col_count)
 }
 
-fn parse_csv(input_content: &str) -> Result<(), ()> {
-    // TODO:
-    for col in input_content.split('|') {
-        println!("{col}", col = col.trim());
+fn parse_table_from_content(input_content: &str) -> Result<Table, ()> {
+    let (rows, cols) = estimate_table_size(&input_content);
+    let mut table: Table = data::Table {
+        rows,
+        cols,
+        cells: vec![],
+    };
+
+    for row in input_content.lines() {
+        if row.trim().is_empty() {
+            continue;
+        }
+        let mut row_cells: Vec<Cell> = vec![];
+        for col in row.split('|') {
+            let cell = Cell::new(data::CellKind::Text(col.to_string()));
+            row_cells.push(cell);
+        }
+        table.cells.push(row_cells);
     }
 
-    Ok(())
+    Ok(table)
 }
 
 fn cal(input_content: String) -> Result<(), ()> {
